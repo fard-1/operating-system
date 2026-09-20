@@ -47,7 +47,7 @@ StopWatch:
         dec     eax
         call    far     [esi+Hcall_buf]
    .skip:
-        mov     eax,    [0x578]
+        mov     eax,    [0x584]
         mov     eax,    [eax]
         mov     esi,    [0x500]
         mov     esi,    [esi+5]
@@ -57,12 +57,12 @@ StopWatch:
         sub     eax,    [esi+timer]
         call    near    write_hex
         sub     ebx,    2
-        mov     edi,    eax
         push    ecx
         push    edx
         xor     edx,    edx
         mov     ecx,    60
         div     ecx
+        mov     edi,    eax
         mov     eax,    edx
         pop     edx
         pop     ecx
@@ -79,6 +79,14 @@ StopWatch:
         pop     ecx
         sub     ebx,    2
         call    near    write_hex
+        mov     eax,    edi
+        push    ecx
+        push    edx
+        xor     edx,    edx
+        mov     ecx,    60
+        div     ecx
+        pop     edx
+        pop     ecx
         mov     ecx,    4
         sub     ebx,    4
         call    near    write_hex
@@ -118,7 +126,7 @@ eventprocess:
         and     ebx,     255
         cmp     ebx,    3
         jne     .marker
-        mov     eax,    [0x578]
+        mov     eax,    [0x584]
         mov     eax,    [eax]
         mov     [esi+timer],    eax
   .endeventprocess:
