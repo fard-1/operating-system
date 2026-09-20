@@ -68,6 +68,7 @@ init:
         pop     ds
         sti                         ; Re-enable interrupts safely
         mov     dword  [0x80*4], call_convert
+        mov     dword  [0x81*4], call_convert2
         mov     dword  [0x3*4], breakpoint_int
         mov     word  [0x4cfff], 0
         mov     dword [0x4cffa], 0x50000
@@ -92,8 +93,10 @@ init:
         mov     dword [0x54c], copy
         mov     dword [0x550], rect_width
         mov     dword [0x554], addapps
-        mov     dword [0x574], sleep
-        mov     dword [0x578], tickcount
+        mov     dword [0x580], sleep
+        mov     dword [0x584], tickcount
+        mov     dword [0x58c], StopWatch
+        mov     dword [0x590], StopWatch_len
         push    eax
         mov     eax,    cr4
         or      eax,    11000000000b
@@ -111,7 +114,7 @@ init:
         popa
         call    init_PIT
         addprocesses  app_2,     app_2l
-        addprocesses  StopWatch, StopWatch_len
+        addprocesses  launcher,  launcher_len
         pop     eax
 again:                                            ; execute processes
         getalloc                 0
@@ -144,7 +147,6 @@ again:                                            ; execute processes
         pop     esi
         add     esi,    9
         jmp     !loop
-
 __malloc:                          ;allocate
         push   esi
         xor    esi, esi
@@ -192,6 +194,9 @@ include "apps\ui.ASM"
 StopWatch:
 file "apps\stopwatch.bin"
 StopWatch_len = $ - StopWatch
+launcher:
+file "apps\launcher.bin"
+launcher_len = $ - launcher
 parse_hex:
     push    ebx
     push    ecx
@@ -327,11 +332,19 @@ addapps:
         mov     [eax+esi+4],   ecx
         popa
         ret
-
 hang:
         jmp     $
 call_convert:                                  ;call to system functions
         call    di
+        iret
+call_convert2:
+        push    edi
+        shr     edi,    4
+        mov     [Mcall_buf+2], di     ;segment
+        pop     edi
+        and     edi,    15
+        mov     [Mcall_buf], di
+        call    far     [Mcall_buf]
         iret
 addfile:
         pusha
@@ -480,6 +493,8 @@ file 'icons/warn.bin'
 lel_data:
 file 'icons/lel.bin'
 newline db 13,10,0
+Mcall_buf:
+dd 0
 testaudio  AudioProcess testsound,      800,    1, 3.6
 testaudio2  AudioProcess testsound,      798,    1, 3.4
 testsound:
