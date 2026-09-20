@@ -13,6 +13,17 @@ app_2:
         movzx   edx,    [esi+mouse_y-app_2]
         mov     eax,    0xffffff
         callsystem      pix
+        mov     eax,    0x000000
+        dec     ecx
+        callsystem      pix
+        inc     ecx
+        inc     edx
+        callsystem      pix
+        sub     edx,    2
+        callsystem      pix
+        inc     ecx
+        inc     edx
+        callsystem      pix
         mov     [esi+drawui-app_2],     0
         mov     [esi+initui-app_2],     1
         mov     esi,    [esi+buf_main-app_2]
@@ -591,8 +602,8 @@ Render_Window_Elements:
 initui db 0
 drawui db 0
 buf_main dd 0
-mouse_x dw 0
-mouse_y dw 0
+mouse_x dw 1
+mouse_y dw 1
 click db 0
 callbuffer: dd 0
 app_2l = $ - app_2
