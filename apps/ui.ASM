@@ -38,6 +38,8 @@ app_2:
         jne     near    .skip_rendering_window_frame
         pusha
         push    esi
+        push    edi
+        mov     edi,    esi
         mov     ecx,    [esi]
         mov     edx,    [esi+4]
         mov     ebx,    [esi+12]
@@ -49,6 +51,21 @@ app_2:
         mov     ebx,    p_size
         mov     eax,    0xff94de
         callsystem      rect_width
+        mov     eax,    0x000000
+        mov     ebx,    2
+        callsystem      rect_width
+        mov     esi,    [edi+8]
+        add     edx,    [edi+12]
+        add     edx,    p_size
+        callsystem      rect_width
+        mov     edx,    [edi+4]
+        mov     ebx,    [edi+12]
+        add     ebx,    p_size
+        mov     esi,    2
+        callsystem      rect_width
+        add     ecx,    [edi+8]
+        callsystem      rect_width
+        pop     edi
         pop     esi
         popa
         mov     byte    [esi+20],       0
