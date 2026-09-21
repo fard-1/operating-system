@@ -1,6 +1,6 @@
 org 0x0
 include '..\misc.inc'
-launcher:
+explorer:
         pusha
         push    esi
         push    edi
@@ -31,17 +31,10 @@ eventprocess:
         cmp     [esi+EventOnetime],     1
         je      AfterInit.skip
         mov     [esi+EventOnetime],     1
-        cmp     ebx,    2
-        jne     .app1
-        addprocesses    [0x594],        [0x598]
-        jmp     AfterInit.skip
-    .app1:
-        addprocesses    [0x58c],        [0x590]
         jmp     AfterInit.skip
 Init:
         mov     esi,    [esi+5]
         add     [esi+WndElements+12],   esi
-        add     [esi+WndElements+44],   esi
         mov     edi,    [0x558]
         push    edi
         shr     edi,    4
@@ -59,9 +52,27 @@ Init:
         mov     esi,    [esi+5]
         mov     eax,    [eax]
         mov     [esi+windowID], eax
+        push    ebx
+        push    esi
+        getalloc 2
+        mov     ebx,    [esi]
+        add     esi,    4
+ .loop:
+        cmp     ebx,    0
+        je      .ret
+
         int3
+        add     esi,    16
+        dec     ebx
+        pusha
+        push    esi
+        mov     eax,    esi
+        mov     esi,    [0x500]
+        mov     esi,    [esi+5]
         mov     ebx,    esi
         add     ebx,    WndElements
+        mov     [ebx+12],       eax
+        add     word    [ebx+4],        50
         mov     edi,    [0x55c]
         push    edi
         shr     edi,    4
@@ -69,17 +80,24 @@ Init:
         pop     edi
         and     edi,    15
         mov     [esi+Hcall_buf], di
+        mov     eax,    [esi+windowID]
         dec     eax
+
+        int3
         call    far     [esi+Hcall_buf]
+        pop     esi
+        popa
+        jmp     .loop
+ .ret:
+        pop     esi
+        pop     ebx
         jmp     near    word    AfterInit
 windowID dd 0
 Hcall_buf:
 dd 0
 EventOnetime db 0
-FirstString db "Stopwatch",0
-String2 db "Explorer",0
+FirstString db "Open",0
 WndElements:
-        wnd_element ui_button,50,100,100+65536*50,FirstString
-        wnd_element ui_button,50,160,100+65536*50,String2
+        wnd_element ui_text,50,100,0,0
         wnd_element ui_list_terminator,0,0,0,0
-launcher_len = $ - launcher
+explorer_len = $ - explorer
